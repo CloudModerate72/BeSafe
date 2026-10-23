@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="de-CH">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <title>Probeprüfung – Mathematik, Physik, Allgemeinwissen</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">P</span>
+      <div class="brand-text">
+        <strong>Probeprüfung</strong>
+        <span>Mathematik · Physik · Allgemeinwissen</span>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <span class="candidate" id="candidateLabel" hidden></span>
+      <div class="timer" id="timer" hidden role="timer" aria-live="off">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9 2h6"/></svg>
+        <span id="timerValue">30:00</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Startbildschirm -->
+  <main id="startScreen" class="screen">
+    <section class="card start-card">
+      <h1>Probeprüfung</h1>
+      <p class="lead">Diese Probeprüfung simuliert eine schulische Prüfung im Safe Exam Browser.</p>
+
+      <div class="facts">
+        <div class="fact"><span class="fact-value">20</span><span class="fact-label">Fragen</span></div>
+        <div class="fact"><span class="fact-value">30</span><span class="fact-label">Minuten</span></div>
+        <div class="fact"><span class="fact-value" id="maxPointsFact">20</span><span class="fact-label">Punkte</span></div>
+      </div>
+
+      <h2>Hinweise</h2>
+      <ul class="rules">
+        <li>Die Prüfung umfasst Multiple-Choice-Fragen und Fragen mit Texteingabe.</li>
+        <li>Der Countdown startet, sobald Sie auf «Prüfung starten» klicken. Bei Ablauf der Zeit wird automatisch abgegeben.</li>
+        <li>Sie können frei zwischen den Fragen wechseln und Fragen zur späteren Kontrolle markieren.</li>
+        <li>Bei Zahlen dürfen Sie Punkt oder Komma als Dezimaltrennzeichen verwenden. Geben Sie nur die Zahl ohne Einheit ein.</li>
+        <li>Hilfsmittel: keine. Taschenrechner, andere Programme und Webseiten sind nicht erlaubt.</li>
+        <li>Nach der Abgabe sehen Sie Punkte, Prozent, Note (Schweizer Skala 1–6) und die korrekten Lösungen.</li>
+      </ul>
+
+      <label class="field" for="candidateName">
+        <span>Name (optional)</span>
+        <input type="text" id="candidateName" maxlength="60" autocomplete="off" spellcheck="false" placeholder="Vorname Nachname">
+      </label>
+
+      <button type="button" class="btn btn-primary btn-lg" id="startBtn">Prüfung starten</button>
+    </section>
+  </main>
+
+  <!-- Prüfung -->
+  <main id="examScreen" class="screen exam-layout" hidden>
+    <aside class="sidebar card">
+      <div class="progress-block">
+        <div class="progress-head">
+          <span>Fortschritt</span>
+          <span id="progressText">0 / 20 beantwortet</span>
+        </div>
+        <div class="progress" role="progressbar" aria-valuemin="0" aria-valuemax="20" aria-valuenow="0" id="progressBar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <nav class="navigator" id="navigator" aria-label="Fragenübersicht"></nav>
+
+      <ul class="legend">
+        <li><span class="dot dot-answered"></span>beantwortet</li>
+        <li><span class="dot dot-flagged"></span>markiert</li>
+        <li><span class="dot dot-open"></span>offen</li>
+      </ul>
+
+      <button type="button" class="btn btn-danger btn-block" id="submitBtn">Prüfung abgeben</button>
+    </aside>
+
+    <section class="card question-card">
+      <div class="question-meta">
+        <span class="badge" id="qCategory">Mathematik</span>
+        <span class="q-number" id="qNumber">Frage 1 von 20</span>
+        <span class="q-points" id="qPoints">1 Punkt</span>
+      </div>
+      <h2 class="question-text" id="qText"></h2>
+      <div class="answer-area" id="answerArea"></div>
+
+      <div class="question-actions">
+        <button type="button" class="btn btn-ghost" id="prevBtn">← Zurück</button>
+        <button type="button" class="btn btn-flag" id="flagBtn" aria-pressed="false">Markieren</button>
+        <button type="button" class="btn btn-primary" id="nextBtn">Weiter →</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Resultat -->
+  <main id="resultScreen" class="screen" hidden>
+    <section class="card result-card">
+      <p class="result-kicker" id="resultKicker">Prüfung abgegeben</p>
+      <h1 id="resultTitle">Resultat</h1>
+
+      <div class="result-summary">
+        <div class="grade-ring" id="gradeRing">
+          <span class="grade-value" id="gradeValue">–</span>
+          <span class="grade-label">Note</span>
+        </div>
+        <div class="result-stats">
+          <div class="stat"><span class="stat-label">Punkte</span><span class="stat-value" id="pointsValue">–</span></div>
+          <div class="stat"><span class="stat-label">Prozent</span><span class="stat-value" id="percentValue">–</span></div>
+          <div class="stat"><span class="stat-label">Note exakt</span><span class="stat-value" id="gradeExact">–</span></div>
+          <div class="stat"><span class="stat-label">Benötigte Zeit</span><span class="stat-value" id="timeUsed">–</span></div>
+        </div>
+      </div>
+
+      <p class="grade-note">Notenberechnung: Note = Punkte ÷ Maximalpunktzahl × 5 + 1, gerundet auf halbe Noten. Ab Note 4 ist die Prüfung genügend.</p>
+
+      <div class="category-breakdown" id="categoryBreakdown"></div>
+
+      <div class="result-actions">
+        <button type="button" class="btn btn-primary" id="quitBtn">Probeprüfung beenden</button>
+        <button type="button" class="btn btn-ghost" id="restartBtn">Neuer Versuch</button>
+      </div>
+      <p class="quit-hint" id="quitHint" hidden></p>
+    </section>
+
+    <section class="card review-card">
+      <h2>Lösungen</h2>
+      <ol class="review-list" id="reviewList"></ol>
+    </section>
+  </main>
+
+  <!-- Dialog -->
+  <div class="modal-backdrop" id="modal" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <h2 id="modalTitle"></h2>
+      <p id="modalText"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="modalCancel">Abbrechen</button>
+        <button type="button" class="btn btn-primary" id="modalConfirm">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" hidden></div>
+
+  <noscript><div class="noscript">Für diese Prüfung muss JavaScript aktiviert sein.</div></noscript>
+  <script src="script.js"></script>
+</body>
+</html>
